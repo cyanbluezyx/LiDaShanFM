@@ -1,0 +1,73 @@
+<template>
+  <view class="radio-list" wx:if="{{list.length > 0}}">
+		<repeat for="{{list}}" item="item">
+			<view bindtap="playRadio({{item}})">
+				<view class="radio-title">{{item.title}}</view>
+				<view class="radio-properties-container">
+					<view class="radio-properties-playcount">
+						<image src="../../images/icon-play.png" style="width:20rpx;height:20rpx;"></image>
+							{{item.playCount}}
+					</view>
+					<view class="radio-properties-playlength">
+						<image src="../../images/icon-count.png" style="width:20rpx;height:20rpx;"></image>
+						{{item.playLength}}
+					</view>
+					<view class="radio-properties-playdate">{{item.date}}</view>
+					</view>
+				</view>
+			</view>
+		</repeat>
+	</view>
+</template>
+<script>
+import wepy from 'wepy'
+
+export default class RadioList extends wepy.component {
+	props = {
+		list: {
+			type: Object,
+			default: []
+		}
+	}
+
+	methods = {
+		playRadio(audio) {
+			console.log(audio)
+			wepy.navigateTo({
+				url: '/pages/radio/radio_play?jsonStr=' + JSON.stringify(audio)
+			})
+		}
+	}
+}
+</script>
+<style lang="less">
+	.radio-list{
+		border-top: solid 2rpx #cdcdcd;
+		border-bottom: solid 2rpx #cdcdcd;
+		margin-top: 30rpx;
+		.radio-title{
+			color: #111;
+			font-size: 32rpx;
+			padding-top: 20rpx;
+		}
+		.radio-properties-container{
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+			margin: 20rpx auto;
+			.radio-properties-playcount{
+				font-size:20rpx;
+			}
+			.radio-properties-playlength{
+				font-size:20rpx;
+			}
+			.radio-properties-playdate{
+				font-size:20rpx;
+				position:relative;
+				right:0rpx;
+			}
+		}
+	}
+</style>
+
+

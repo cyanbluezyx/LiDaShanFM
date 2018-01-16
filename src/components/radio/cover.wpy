@@ -1,0 +1,72 @@
+<template>
+	<view>
+		<view class="title-container">
+			<view>
+				<image class="radio-cover" src="../../images/avator.jpg"></image>
+			</view>
+			<view class="radio-description">
+				<view class="rate">
+					<label>评分：</label>
+					<view style="display:inline-block;">
+						<image class="icon-star" wx:for="{{rate}}" wx:for-item="r" wx:key="r" src="../../images/star.png"></image>
+					</view>
+				</view>
+				<view class="description">听她的声音，会上瘾。</view>
+			</view>
+		</view>
+		<view class="btn-group">
+			<button class="button type_empity btn-50" formType="submit">分享给好友</button>
+			<button class="button type_red btn-50" formType="submit" style="text-align:center;">
+				收藏
+				</button>
+		</view>
+	</view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class RadioCover extends wepy.component {
+    data = {
+			rate:5
+		}
+  }
+</script>
+<style lang="less">
+	.btn-50 {
+		width: 42%;
+	}
+	.btn-group {
+		display: flex;
+		flex-direction: row;
+		padding-bottom: 30rpx;
+	}
+	.radio-cover {
+		width:220rpx;
+		height:220rpx;
+		padding:20rpx 40rpx;
+	}
+	.title-container {
+		display: flex;
+		flex-direction: row;
+	}
+	.radio-description {
+		padding: 20rpx 40rpx;
+		.rate {
+			font-size: 28rpx;
+		}
+		.description {
+			padding-top: 30rpx;
+			font-size:24rpx;
+		}
+	}
+	.icon-star {
+		width:32rpx;
+		height:32rpx;
+		position: relative;
+		top: 2rpx;
+		left: 0rpx;
+	}
+</style>
+
+

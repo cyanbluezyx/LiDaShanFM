@@ -1,0 +1,24 @@
+
+.header {
+  background: #ff6a3c;
+  height: 260rpx;
+  width: 100%;
+}
+
+.header_content {
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  padding-top: 48rpx;
+}
+
+.avatarUrl {
+  width: 122rpx;
+  height: 122rpx;
+  border-radius: 1000px;
+}
+
+.nickName {
+  font-size: 30rpx;
+  padding-top: 15rpx;
+}

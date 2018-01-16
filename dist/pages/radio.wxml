@@ -1,0 +1,51 @@
+
+  
+	<view>
+		<view class="title-container">
+			<view>
+				<image class="radio-cover" src="../images/avator.jpg"/>
+			</view>
+			<view class="radio-description">
+				<view class="rate">
+					<label>评分：</label>
+					<view style="display:inline-block;">
+						<image class="icon-star"  wx:for="{{$radioCover$rate}}" wx:for-item="r" wx:key="r" src="../images/star.png"/>
+					</view>
+				</view>
+				<view class="description">听她的声音，会上瘾。</view>
+			</view>
+		</view>
+		<view class="btn-group">
+			<button class="button type_empity btn-50" formType="submit">分享给好友</button>
+			<button class="button type_red btn-50" formType="submit" style="text-align:center;">
+				收藏
+				</button>
+		</view>
+	</view>
+
+  <view class="radio-list-container">
+    <label style="color: #8a8a8a;font-size: 28rpx;">
+      节目列表 （{{radioList.length}}）
+    </label>
+    
+  <view class="radio-list"  wx:if="{{$radioList$list.length > 0}}">
+		<block wx:for="{{$radioList$list}}" wx:for-index="$radioList$index" wx:for-item="$radioList$item" wx:key="$radioList$key">
+			<view bindtap="$radioList$playRadio" data-wpyplayradio-a="{{$radioList$item}}">
+				<view class="radio-title">{{$radioList$item.title}}</view>
+				<view class="radio-properties-container">
+					<view class="radio-properties-playcount">
+						<image src="../images/icon-play.png" style="width:20rpx;height:20rpx;"/>
+							{{$radioList$item.playCount}}
+					</view>
+					<view class="radio-properties-playlength">
+						<image src="../images/icon-count.png" style="width:20rpx;height:20rpx;"/>
+						{{$radioList$item.playLength}}
+					</view>
+					<view class="radio-properties-playdate">{{$radioList$item.date}}</view>
+					</view>
+				</view>
+			
+		</block>
+	</view>
+
+  </view>

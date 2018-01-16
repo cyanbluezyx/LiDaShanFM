@@ -1,0 +1,3 @@
+@import "./../components/radio/list.wxss";
+@import "./../components/radio/cover.wxss";
+.radio-list-container{margin:10rpx 40rpx}

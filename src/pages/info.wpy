@@ -1,0 +1,65 @@
+<template>
+  <view class="info">
+    <view class="header">
+      <view class="header_content">
+        <image class="avatarUrl" src="{{avatarUrl}}"></image>
+        <view class="nickName cfff">{{nickName}}</view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  import {
+      USER_INFO
+  }from '../utils/constant'
+  import tip from '../utils/tip'
+
+  export default class Info extends wepy.page {
+
+    config = {
+        navigationBarTitleText: '我',
+    }
+
+    data = {
+        avatarUrl: '',
+        nickName: ''
+    }
+
+
+    onShow() {
+        tip.loading()
+        let userInfo = wepy.getStorageSync(USER_INFO)
+        this.avatarUrl = userInfo.avatarUrl
+        this.nickName = userInfo.nickName  
+        this.showLoading = false;
+    }
+  }
+</script>
+<style>
+.header {
+  background: #ff6a3c;
+  height: 260rpx;
+  width: 100%;
+}
+
+.header_content {
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  padding-top: 48rpx;
+}
+
+.avatarUrl {
+  width: 122rpx;
+  height: 122rpx;
+  border-radius: 1000px;
+}
+
+.nickName {
+  font-size: 30rpx;
+  padding-top: 15rpx;
+}
+</style>

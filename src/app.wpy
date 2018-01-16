@@ -1,0 +1,128 @@
+<style lang="less">
+@import "./styles/base";
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+</style>
+
+<script>
+import wepy from 'wepy'
+import 'wepy-async-function'
+
+import {
+  USER_SPECICAL_INFO,
+  USER_INFO,
+  SYSTEM_INFO
+} from './utils/constant'
+
+export default class extends wepy.app {
+  config = {
+    pages: [
+      'pages/radio',
+      'pages/community',
+      'pages/wall',
+      'pages/info',
+      'pages/radio/radio_play'
+    ],
+    window: {
+      backgroundTextStyle: 'light',
+      navigationBarBackgroundColor: '#EC1D24',
+      navigationBarTitleText: '李大山FM',
+      navigationBarTextStyle: 'white'
+    },
+    "tabBar": {
+      "color": "#2C2C2C",
+      "selectedColor": "#EC1D24",
+      "backgroundColor": "#F3F3F3",
+      "borderStyle": "black",
+      "list": [{
+        "pagePath": "pages/radio",
+        "text": "电台",
+        "iconPath": "images/radio_logo.png",
+        "selectedIconPath": "images/radio_logo_active.png"
+      }, {
+        "pagePath": "pages/community",
+        "text": "声控",
+        "iconPath": "images/micro_logo.png",
+        "selectedIconPath": "images/micro_logo_active.png"
+      }, {
+        "pagePath": "pages/wall",
+        "text": "表白墙",
+        "iconPath": "images/love_logo.png",
+        "selectedIconPath": "images/love_logo_active.png"
+      }, {
+        "pagePath": "pages/info",
+        "text": "我",
+        "iconPath": "images/info_logo.png",
+        "selectedIconPath": "images/info_logo_active.png"
+      }]
+    }
+  }
+
+  globalData = {
+    userInfo: null,
+    appid: 'wxbdc9e5c5e85a8f71'
+  }
+
+  constructor () {
+    super()
+    this.use('requestfix')
+    this.use('promisify');
+  }
+
+  async onLaunch() {
+    let that = this
+
+    let userInfo = wepy.getStorageSync(USER_INFO) || {}
+    console.log(userInfo)
+
+    if(!userInfo.nickName){
+      let res = await wepy.login()
+
+      if(res.code){
+        let _userInfo = await wepy.getUserInfo()
+
+        wepy.setStorageSync(USER_INFO,_userInfo.userInfo)
+        console.log(that.globalData.userInfo)
+
+        let _systemInfo = wepy.getSystemInfoSync()
+
+        wepy.setStorageSync(SYSTEM_INFO,_systemInfo)
+
+      }
+    }
+
+  }
+
+  sleep (s) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve('promise resolved')
+      }, s * 1000)
+    })
+  }
+
+  async testAsync () {
+    const data = await this.sleep(3)
+    console.log(data)
+  }
+
+  getUserInfo(cb) {
+    const that = this
+    if (this.globalData.userInfo) {
+      return this.globalData.userInfo
+    }
+    wepy.getUserInfo({
+      success (res) {
+        that.globalData.userInfo = res.userInfo
+        cb && cb(res.userInfo)
+      }
+    })
+  }
+}
+</script>

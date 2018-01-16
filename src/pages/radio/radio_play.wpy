@@ -1,0 +1,112 @@
+<template>
+  <view class="play-container">
+      <image src="../../images/avator.jpg" class="play-cover">
+
+			</image>
+			<view>
+				<progress percent="40" stroke-width="2" activeColor="#E8353B" backgroundColor="#DFDADA" active></progress>
+				<view class="process-time-container">
+					<label>00:55</label>
+					<label>08:22</label>
+				</view>
+			</view>
+			<view class="audio-name">
+				{{audio.title}}
+			</view>
+			<view>
+				李大山
+			</view>
+			<view class="audio-controls-container">
+				<image src="../../images/icon-back.png" bindtap="seek(-30)"></image>
+				<image src="../../images/icon-last.png"></image>
+				<image  class="icon-middle" src="../../images/icon-run.png" bindtap="playAudio"></image>
+				<image src="../../images/icon-next.png"></image>
+				<image src="../../images/icon-forward.png" bindtap="seek(30)"></image>
+			</view>
+			<audio src="{{src}}" id="myAudio" loop autoplay></audio>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+
+export default class RadioPlay extends wepy.page {
+  config = {
+      navigationBarBackgroundColor: "#332D2D",
+      navigationBarTitleText: "正在播放",
+      navigationBarTextStyle: "white",
+      backgroundColor: "#332D2D"
+	}
+	
+	data = {
+		audio:{},
+		myAudio:{},
+		src: 'http://ws.stream.qqmusic.qq.com/M500001VfvsJ21xFqb.mp3?guid=ffffffff82def4af4b12b3cd9337d5e7&uin=346897220&vkey=6292F51E1E384E06DCBDC9AB7C49FD713D632D313AC4858BACB8DDD29067D3C601481D36E62053BF8DFEAF74C0A5CCFADD6471160CAF3E6A&fromtag=46',
+	}
+
+	methods = {
+		playAudio() {
+			if(this.myAudio){
+				this.myAudio.play()
+			}
+		},
+		seek(time){
+			let seektime = this.myAudio.currentTime + Number.parseInt(time)
+			this.myAudio.seek(seektime)
+		}
+	}
+
+	onLoad(options) {
+    // 使用 wx.createAudioContext 获取 audio 上下文 context
+		//this.audioCtx = wx.createInnerAudioContext('myAudio')
+		let item = JSON.parse(options.jsonStr)
+		this.audio = item
+		this.myAudio = wx.createInnerAudioContext()
+		this.myAudio.autoplay = false
+		this.myAudio.src = this.src
+  }
+}
+</script>
+<style lang="less">
+	page{
+		background-color: #332D2D;
+	}
+	.play-container {
+		text-align: center;
+		.play-cover { 
+			width:480rpx;
+			height:480rpx;
+			margin-top:30rpx;
+		}
+		.audio-name {
+			font-size: 34rpx;
+			color: white;
+			padding: 20rpx 0rpx;
+		}
+		progress{
+			padding: 20rpx 40rpx;
+		}
+		.process-time-container{
+			padding: 0rpx 40rpx;
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+		}
+		.audio-controls-container{
+			padding: 40rpx 80rpx;
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: center;
+			image {
+				width: 40rpx;
+				height: 40rpx;
+			}
+			.icon-middle{
+				width: 100rpx;
+				height: 100rpx;
+			}
+		}
+	}
+</style>
+
+
