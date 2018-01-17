@@ -1,32 +1,11 @@
-<template>
-  <radioCover></radioCover>
-  <view class="radio-list-container">
-    <label style="color: #8a8a8a;font-size: 28rpx;">
-      节目列表 （{{radioList.length}}）
-    </label>
-    <radioList :list.sync="radioList"></radioList>
-  </view>
-  
-</template>
+import {
+    wxRequest,
+    wxRequestNotLoading
+  } from '../utils/wxRequest';
 
-<script>
-  import wepy from 'wepy'
-
-  import RadioCover from '../components/radio/cover'
-  import RadioList from '../components/radio/list'
-
-  export default class Radio extends wepy.page {
-    config = {
-      navigationBarTitleText: '李大山电台'
-    }
-
-    components = {
-      radioCover: RadioCover,
-      radioList: RadioList
-    }
-
-    data = {
-      radioList:[
+const getAudioList = (params) => {
+    //wxRequest(params, apiMall + '/goods/list?cateidOne=1&cateidTwo=0&price=0&sales=2');
+    return [
         {
           radioId: 'RI1000001',
           title:'“算了吧，放下吧，忘了吧”',
@@ -73,12 +52,8 @@
           author: '李大山'
         }
       ]
-    }
-  }
-</script>
-<style lang="less">
-  .radio-list-container{
-    margin: 10rpx 40rpx;
-  }
-</style>
+}
 
+module.exports = {
+    getAudioList
+}

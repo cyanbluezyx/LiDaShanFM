@@ -11,3 +11,9 @@ export const USER_INFO = "userInfo";
  * @type {String}
  */
 export const SYSTEM_INFO = "systemInfo";
+
+/**
+ * 电台文件路径
+ * @type {String}
+ */
+export const AUDIO_PATH = 'http://116.62.147.233:4001/static/radio/'

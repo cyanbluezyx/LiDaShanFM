@@ -4,24 +4,23 @@
 
 			</image>
 			<view>
-				<progress percent="40" stroke-width="2" activeColor="#E8353B" backgroundColor="#DFDADA" active/>
+				<progress percent="{{curProcess}}" stroke-width="2" activeColor="#E8353B" backgroundColor="#DFDADA"/>
 				<view class="process-time-container">
-					<label>00:55</label>
-					<label>08:22</label>
+					<label>{{curTime}}</label>
+					<label>{{totalDuration}}</label>
 				</view>
 			</view>
 			<view class="audio-name">
-				{{audio.title}}
+				{{curAudio.title}}
 			</view>
 			<view>
-				李大山
+				{{curAudio.author}}
 			</view>
 			<view class="audio-controls-container">
 				<image src="../../images/icon-back.png" bindtap="seek" data-wpyseek-a="-30"/>
-				<image src="../../images/icon-last.png"/>
-				<image class="icon-middle" src="../../images/icon-run.png" bindtap="playAudio"/>
-				<image src="../../images/icon-next.png"/>
+				<image src="../../images/icon-last.png" bindtap="turnAudio" data-wpyturnaudio-a="-1"/>
+				<image class="icon-middle" src="{{playBtnSrc}}" bindtap="playAudio"/>
+				<image src="../../images/icon-next.png" bindtap="turnAudio" data-wpyturnaudio-a="1"/>
 				<image src="../../images/icon-forward.png" bindtap="seek" data-wpyseek-a="30"/>
 			</view>
-			<audio src="{{src}}" id="myAudio" loop autoplay/>
   </view>

@@ -4,30 +4,32 @@
 
 			</image>
 			<view>
-				<progress percent="40" stroke-width="2" activeColor="#E8353B" backgroundColor="#DFDADA" active></progress>
+				<progress percent="{{curProcess}}" stroke-width="2" activeColor="#E8353B" backgroundColor="#DFDADA"></progress>
 				<view class="process-time-container">
-					<label>00:55</label>
-					<label>08:22</label>
+					<label>{{curTime}}</label>
+					<label>{{totalDuration}}</label>
 				</view>
 			</view>
 			<view class="audio-name">
-				{{audio.title}}
+				{{curAudio.title}}
 			</view>
 			<view>
-				李大山
+				{{curAudio.author}}
 			</view>
 			<view class="audio-controls-container">
-				<image src="../../images/icon-back.png" bindtap="seek(-30)"></image>
-				<image src="../../images/icon-last.png"></image>
-				<image  class="icon-middle" src="../../images/icon-run.png" bindtap="playAudio"></image>
-				<image src="../../images/icon-next.png"></image>
-				<image src="../../images/icon-forward.png" bindtap="seek(30)"></image>
+				<image src="../../images/icon-back.png" @tap="seek(-30)"></image>
+				<image src="../../images/icon-last.png" @tap="turnAudio(-1)"></image>
+				<image  class="icon-middle" src="{{playBtnSrc}}" @tap="playAudio"></image>
+				<image src="../../images/icon-next.png" @tap="turnAudio(1)"></image>
+				<image src="../../images/icon-forward.png" @tap="seek(30)"></image>
 			</view>
-			<audio src="{{src}}" id="myAudio" loop autoplay></audio>
   </view>
 </template>
 <script>
 import wepy from 'wepy'
+import api from '../../api/api'
+
+import {AUDIO_PATH} from '../../utils/constant'
 
 export default class RadioPlay extends wepy.page {
   config = {
@@ -38,32 +40,108 @@ export default class RadioPlay extends wepy.page {
 	}
 	
 	data = {
-		audio:{},
+		curAudio:{},
 		myAudio:{},
-		src: 'http://ws.stream.qqmusic.qq.com/M500001VfvsJ21xFqb.mp3?guid=ffffffff82def4af4b12b3cd9337d5e7&uin=346897220&vkey=6292F51E1E384E06DCBDC9AB7C49FD713D632D313AC4858BACB8DDD29067D3C601481D36E62053BF8DFEAF74C0A5CCFADD6471160CAF3E6A&fromtag=46',
+		curProcess: 0,
+		curTime: '00:00',
+		totalDuration: '00:00',
+		audioList: [],
+		playBtnSrc: '../../images/icon-run.png',
 	}
 
+	computed = {
+	}
+	
 	methods = {
 		playAudio() {
-			if(this.myAudio){
+			if(this.myAudio.paused){
 				this.myAudio.play()
+				this.playBtnSrc = '../../images/icon-pause.png'
+			}else{
+				this.myAudio.pause()
+				this.playBtnSrc = '../../images/icon-run.png'
 			}
 		},
 		seek(time){
 			let seektime = this.myAudio.currentTime + Number.parseInt(time)
-			this.myAudio.seek(seektime)
+			this.myAudio.seek(seektime)	
+		},
+		turnAudio(num) {
+			let curIndex = this.audioList.findIndex((item) => {
+				return (item.radioId == this.curAudio.radioId)
+			}) + Number.parseInt(num)
+			if(curIndex < this.audioList.length && curIndex >= 0){
+				this.curAudio = this.audioList[curIndex]
+			}else{
+					this.curAudio = this.audioList[0]
+			}
+			this.wxAudioControls()
 		}
 	}
 
 	onLoad(options) {
-    // 使用 wx.createAudioContext 获取 audio 上下文 context
-		//this.audioCtx = wx.createInnerAudioContext('myAudio')
+		//获取当前音频信息
 		let item = JSON.parse(options.jsonStr)
-		this.audio = item
-		this.myAudio = wx.createInnerAudioContext()
-		this.myAudio.autoplay = false
-		this.myAudio.src = this.src
-  }
+		this.curAudio = item
+		//获取音频列表（用于控制上下首跳转）
+		this.audioList = api.getAudioList()
+		//初始化音频组件
+		this.wxAudioInit()
+	}
+	
+	wxAudioInit() {
+		this.myAudio = wx.getBackgroundAudioManager()//wx.createInnerAudioContext()
+		this.wxAudioControls()
+		this.myAudio.onTimeUpdate(() => {
+			this.wxAudioUpdateProcess()
+		})
+		this.myAudio.onPlay(() => {
+			this.playBtnSrc = '../../images/icon-pause.png'
+		})
+		this.myAudio.onStop(() => {
+			this.playBtnSrc = '../../images/icon-run.png'
+		})
+		this.myAudio.onPause(() => {
+			this.playBtnSrc = '../../images/icon-run.png'
+		})
+		this.myAudio.onWaiting(() => {
+			this.wxAudioUpdateProcess()
+		})
+		this.myAudio.onEnded(() => {
+			let curIndex = this.audioList.findIndex((item) => {
+				return (item.radioId == this.curAudio.radioId)
+			}) + 1
+			if(curIndex >= this.audioList.length){
+				this.curAudio = this.audioList[0]
+			}else{
+				this.curAudio = this.audioList[curIndex]
+			}
+			this.wxAudioControls()
+		})
+	}
+
+	wxAudioUpdateProcess() {
+			this.curProcess = Number.parseInt(this.myAudio.currentTime * 100 / this.myAudio.duration)
+			this.curTime = this.durationFilter(this.myAudio.currentTime)
+			this.$apply()
+	}
+
+	wxAudioControls(){
+		this.myAudio.title = this.curAudio.title
+		this.myAudio.autoplay = true
+		this.myAudio.src = AUDIO_PATH + this.curAudio.audioName
+		this.totalDuration = this.totalDurationFilter(this.curAudio.playLength)
+	}
+
+	durationFilter(time){
+		let minute = Number.parseInt(time / 60).toString().padStart(2,'0'), 
+				sec = Number.parseInt(time % 60).toString().padStart(2,'0')
+		return `${minute}:${sec}`
+	}
+
+	totalDurationFilter(time){
+		return time.replace('分',':').replace('秒','')
+	}
 }
 </script>
 <style lang="less">
