@@ -10,6 +10,7 @@ const wxRequest = async(params = {}, url) => {
         data: data,
         header: { 'Content-Type': 'application/json' },
     });
+    tip.loaded();
     return res;
 };
 

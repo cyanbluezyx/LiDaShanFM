@@ -9,6 +9,9 @@
   box-sizing: border-box;
 }
 </style>
+<template>
+  <view>111</view>
+</template>
 
 <script>
 import wepy from 'wepy'
