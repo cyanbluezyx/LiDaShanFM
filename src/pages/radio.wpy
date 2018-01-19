@@ -4,16 +4,20 @@
     <label style="color: #8a8a8a;font-size: 28rpx;">
       节目列表 （{{radioList.length}}）
     </label>
-    <radioList :list.sync="radioList"></radioList>
+    <radioList :list.sync="radioList" :audio.sync="curAudio"></radioList>
   </view>
-  
+  <radioTool wx:if="{{isShowTool}}" class="radio-tool" :list.sync="radioList" :audio.sync="curAudio" :isPlay.sync="isPlay"></radioTool>
 </template>
 
 <script>
   import wepy from 'wepy'
 
+  import api from '../api/api'
+  import {CURRENT_AUDIO} from '../utils/constant'
+
   import RadioCover from '../components/radio/cover'
   import RadioList from '../components/radio/list'
+  import AudioTool from '../components/radio/audio-tool'
 
   export default class Radio extends wepy.page {
     config = {
@@ -22,63 +26,44 @@
 
     components = {
       radioCover: RadioCover,
-      radioList: RadioList
+      radioList: RadioList,
+      radioTool: AudioTool
     }
 
     data = {
-      radioList:[
-        {
-          radioId: 'RI1000001',
-          title:'“算了吧，放下吧，忘了吧”',
-          playCount: '14.5万',
-          playLength: '3分49秒',
-          date: '2018-1-15',
-          audioName: 'RI1000001.mp3',
-          author: '李大山'
-        },
-        {
-          radioId: 'RI1000002',
-          title:'一辈子都看不见爱情怎么办',
-          playCount: '20.9万',
-          playLength: '2分42秒',
-          date: '2017-12-23',
-          audioName: 'RI1000002.mp3',
-          author: '李大山'
-        },
-        {
-          radioId: 'RI1000003',
-          title:'写给渐渐老去的自己',
-          playCount: '39.5万',
-          playLength: '5分32秒',
-          date: '2017-11-15',
-          audioName: 'RI1000003.mp3',
-          author: '李大山'
-        },
-        {
-          radioId: 'RI1000004',
-          title:'我不愿将就',
-          playCount: '34.4万',
-          playLength: '3分50秒',
-          date: '2017-11-2',
-          audioName: 'RI1000004.mp3',
-          author: '李大山'
-        },
-        {
-          radioId: 'RI1000005',
-          title:'“你一个人过得好吗”',
-          playCount: '50.3万',
-          playLength: '3分21秒',
-          date: '2017-10-25',
-          audioName: 'RI1000005.mp3',
-          author: '李大山'
-        }
-      ]
+      radioList:[],
+      curAudio: {},
+      isPlay: false
+    }
+
+    computed = {
+      isShowTool(){
+        return Object.keys(this.curAudio).length != 0
+      }
+    }
+
+    onLoad() {
+      let that = this
+      let d = that.$parent.globalData
+      d.curAudioList = api.getAudioList()
+      this.radioList = d.curAudioList
+      this.curAudio = d.curAudio
+    }
+
+    onShow() {
+      this.curAudio = wepy.getStorageSync(CURRENT_AUDIO)
+      let audioPlayer = this.$parent.globalData.backgroundAudioPlay
+      this.isPlay = (audioPlayer.paused === undefined || audioPlayer.paused) ? false : true
     }
   }
 </script>
 <style lang="less">
   .radio-list-container{
     margin: 10rpx 40rpx;
+  }
+  .radio-tool{
+    position: fixed;
+    bottom: 0px;
   }
 </style>
 

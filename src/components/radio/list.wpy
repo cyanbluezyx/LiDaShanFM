@@ -2,7 +2,7 @@
   <view class="radio-list" wx:if="{{list.length > 0}}">
 		<repeat for="{{list}}" item="item">
 			<view bindtap="playRadio({{item}})">
-				<view class="radio-title">{{item.title}}</view>
+				<view class="radio-title {{audio.radioId == item.radioId ? 'red' : ''}}">{{item.title}}</view>
 				<view class="radio-properties-container">
 					<view class="radio-properties-playcount">
 						<image src="../../images/icon-play.png" style="width:20rpx;height:20rpx;"></image>
@@ -21,6 +21,7 @@
 </template>
 <script>
 import wepy from 'wepy'
+import {CURRENT_AUDIO} from '../../utils/constant'
 
 export default class RadioList extends wepy.component {
 	props = {
@@ -28,11 +29,16 @@ export default class RadioList extends wepy.component {
 			type: Object,
 			default: []
 		}
+		,
+		audio: {
+			type: Object,
+			default: [],
+			twoWay: true
+		}
 	}
 
 	methods = {
 		playRadio(audio) {
-			console.log(audio)
 			wepy.navigateTo({
 				url: '/pages/radio/radio_play?jsonStr=' + JSON.stringify(audio)
 			})
@@ -49,6 +55,9 @@ export default class RadioList extends wepy.component {
 			color: #111;
 			font-size: 32rpx;
 			padding-top: 20rpx;
+		}
+		.red {
+			color: #EC1D24;
 		}
 		.radio-properties-container{
 			display: flex;

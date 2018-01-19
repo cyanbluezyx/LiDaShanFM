@@ -20,7 +20,9 @@ import 'wepy-async-function'
 import {
   USER_SPECICAL_INFO,
   USER_INFO,
-  SYSTEM_INFO
+  SYSTEM_INFO,
+  AUDIO_PATH,
+  CURRENT_AUDIO
 } from './utils/constant'
 
 export default class extends wepy.app {
@@ -69,7 +71,10 @@ export default class extends wepy.app {
 
   globalData = {
     userInfo: null,
-    appid: 'wxbdc9e5c5e85a8f71'
+    appid: 'wxbdc9e5c5e85a8f71',
+    curAudio: wx.getStorageSync(CURRENT_AUDIO),
+    curAudioList: [],
+    backgroundAudioPlay: {}
   }
 
   constructor () {
@@ -99,7 +104,7 @@ export default class extends wepy.app {
 
       }
     }
-
+    this.wxAudioInit()
   }
 
   sleep (s) {
@@ -127,5 +132,11 @@ export default class extends wepy.app {
       }
     })
   }
+
+  wxAudioInit(){
+    this.globalData.backgroundAudioPlay = wx.getBackgroundAudioManager()
+  }
+
+  
 }
 </script>

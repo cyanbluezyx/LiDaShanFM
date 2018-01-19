@@ -17,3 +17,9 @@ export const SYSTEM_INFO = "systemInfo";
  * @type {String}
  */
 export const AUDIO_PATH = 'http://116.62.147.233:4001/static/radio/'
+
+/**
+ * 当前播放音频
+ * @type {String}
+ */
+export const CURRENT_AUDIO = 'current_audio'

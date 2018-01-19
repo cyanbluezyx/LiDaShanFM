@@ -1,0 +1,154 @@
+<template>
+  <view class="tool-container" @tap="navigateTo">
+		<view class="tool-container tool-main">
+			<view class="tool-img">
+				<image src="../../images/avator.jpg"></image>
+			</view>
+			<view class="tool-context">
+				<view class="tool-title">{{audio.title}}</view>
+				<view class="tool-author">{{audio.author}}</view>
+			</view>
+			<view class="tool-btn-group">
+				<image class="tool-icon" src="{{playBtnSrc}}" catch:tap="playAudio"></image>
+				<image class="tool-icon" src="../../images/icon-tool-next.png" catch:tap="next(1)"></image>
+			</view>
+		</view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+
+import {AUDIO_PATH,CURRENT_AUDIO} from '../../utils/constant'
+
+export default class AudioTool extends wepy.component {
+	props = {
+		list: {
+			type: Object,
+			default: []
+		},
+		audio: {
+			type: Object,
+			default: [],
+			twoWay: true
+		},
+		isPlay: {
+			type: Boolean,
+			default: false,
+			twoWay: true
+		}
+	}
+
+	data = {
+		playBtnSrc: ''
+	}
+
+	watch = {
+		isPlay(newValue, oldValue) {
+			this.playBtnSrc = this.isPlay ? '../images/icon-tool-pause.png' : '../images/icon-tool-run.png'
+			this.$apply()
+		}
+	}
+
+	onLoad() {
+		this.setIcon()
+	}
+
+	methods = {
+		next(num) {
+			let audioList = this.$root.$parent.globalData.curAudioList
+			let audioPlayer = this.$root.$parent.globalData.backgroundAudioPlay
+			let curIndex = audioList.findIndex((item) => {
+				return (item.radioId == this.audio.radioId)
+			}) + Number.parseInt(num)
+			if(curIndex < audioList.length && curIndex >= 0){
+				audioPlayer.src = AUDIO_PATH + audioList[curIndex].audioName
+				this.audio = audioList[curIndex]
+			}else{
+				audioPlayer.src = AUDIO_PATH + audioList[0].audioName
+				this.audio = audioList[0]
+			}
+			audioPlayer.autoplay = true
+			audioPlayer.title = this.audio.title
+			this.$root.$parent.globalData.backgroundAudioPlay = audioPlayer
+			this.$root.$parent.globalData.curAudio = this.audio
+			this.playBtnSrc = '../images/icon-tool-pause.png'
+			wx.setStorageSync(CURRENT_AUDIO,this.audio)
+		},
+		playAudio() {
+			let audioPlayer = this.$root.$parent.globalData.backgroundAudioPlay
+			if(audioPlayer.paused === undefined){
+				audioPlayer.src = AUDIO_PATH + this.audio.audioName
+				this.playBtnSrc = '../images/icon-tool-pause.png'
+			}else if(audioPlayer.paused){
+				audioPlayer.src = AUDIO_PATH + this.audio.audioName
+				audioPlayer.play()
+				this.playBtnSrc = '../images/icon-tool-pause.png'
+			}else{
+				audioPlayer.pause()
+				this.playBtnSrc = '../images/icon-tool-run.png'
+			}
+			this.$root.$parent.globalData.backgroundAudioPlay = audioPlayer
+		},
+		navigateTo() {
+			wepy.navigateTo({
+				url: '/pages/radio/radio_play?jsonStr={}'//?jsonStr=' + JSON.stringify(this.audio)
+			})
+		}
+	}
+
+	setIcon() {
+		//console.log(this.isPlay)
+		this.playBtnSrc = this.isPlay ? '../images/icon-tool-pause.png' : '../images/icon-tool-run.png'
+	}
+}
+</script>
+<style lang="less">
+	.tool-container{
+		height: 90rpx;
+		width: 100%;
+		border-top: solid 1px #E4E4E4;
+		background-color: white;
+		.tool-main{
+			padding: 10rpx 20rpx;
+			width: 96%;
+			height: 70rpx;
+			display: flex;
+			flex-flow:row;
+			justify-content: space-between;
+			align-items: center;
+			.tool-img image{
+				width:70rpx;
+				height:70rpx;
+			}
+			.tool-context {
+				height:70rpx;
+				flex-shrink: 0;
+				text-align:left;
+				flex: 1;
+			}
+			.tool-btn-group{
+				width:200rpx;
+			}
+		}
+		.tool-title{
+			color: #252122;
+			font-size: 26rpx;
+			padding-left: 10rpx;
+			white-space:nowrap;
+			overflow:hidden;
+			text-overflow:ellipsis;
+		}
+		.tool-author{
+			color: #A4A3A3;
+			font-size: 20rpx;
+			padding-left: 10rpx;
+		}
+	}
+	.tool-icon {
+		width: 60rpx;
+		height:60rpx;
+		padding-right: 40rpx;
+	}
+</style>
+
+

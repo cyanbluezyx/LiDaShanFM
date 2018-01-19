@@ -29,7 +29,7 @@
 import wepy from 'wepy'
 import api from '../../api/api'
 
-import {AUDIO_PATH} from '../../utils/constant'
+import {AUDIO_PATH, CURRENT_AUDIO} from '../../utils/constant'
 
 export default class RadioPlay extends wepy.page {
   config = {
@@ -47,24 +47,37 @@ export default class RadioPlay extends wepy.page {
 		totalDuration: '00:00',
 		audioList: [],
 		playBtnSrc: '../../images/icon-run.png',
+		globalData: {}
 	}
+
+	watch = {
+		curAudio (newValue, oldValue) {
+			this.$parent.globalData.curAudio = newValue
+			if(newValue === {}){
+				wepy.removeStorageSync(CURRENT_AUDIO)
+			}
+			else{
+				wepy.setStorageSync(CURRENT_AUDIO, newValue)
+			}
+		}
+  }
 
 	computed = {
 	}
 	
 	methods = {
 		playAudio() {
-			if(this.myAudio.paused){
-				this.myAudio.play()
+			if(this.globalData.backgroundAudioPlay.paused){
+				this.globalData.backgroundAudioPlay.play()
 				this.playBtnSrc = '../../images/icon-pause.png'
 			}else{
-				this.myAudio.pause()
+				this.globalData.backgroundAudioPlay.pause()
 				this.playBtnSrc = '../../images/icon-run.png'
 			}
 		},
 		seek(time){
-			let seektime = this.myAudio.currentTime + Number.parseInt(time)
-			this.myAudio.seek(seektime)	
+			let seektime = this.globalData.backgroundAudioPlay.currentTime + Number.parseInt(time)
+			this.globalData.backgroundAudioPlay.seek(seektime)	
 		},
 		turnAudio(num) {
 			let curIndex = this.audioList.findIndex((item) => {
@@ -75,39 +88,42 @@ export default class RadioPlay extends wepy.page {
 			}else{
 					this.curAudio = this.audioList[0]
 			}
-			this.wxAudioControls()
+			this.wxAudioControls(this.curAudio)
+			this.wxAudioSetContext(this.curAudio)
 		}
 	}
 
 	onLoad(options) {
+		this.globalData = this.$parent.globalData
+		this.curAudio = Object.assign({},this.globalData.curAudio)
+		this.wxAudioInit()
 		//获取当前音频信息
 		let item = JSON.parse(options.jsonStr)
-		this.curAudio = item
-		//获取音频列表（用于控制上下首跳转）
-		this.audioList = api.getAudioList()
-		//初始化音频组件
-		this.wxAudioInit()
+		if(item.radioId !== undefined){
+			this.curAudio = item
+			//获取音频列表（用于控制上下首跳转）
+			this.audioList = this.globalData.curAudioList
+			this.wxAudioControls(this.curAudio)
+		}
+		this.wxAudioSetContext(this.curAudio)
+		
 	}
-	
-	wxAudioInit() {
-		this.myAudio = wx.getBackgroundAudioManager()//wx.createInnerAudioContext()
-		this.wxAudioControls()
-		this.myAudio.onTimeUpdate(() => {
-			this.wxAudioUpdateProcess()
-		})
-		this.myAudio.onPlay(() => {
+
+	wxAudioInit(){
+		this.globalData.backgroundAudioPlay.onPlay(() => {
 			this.playBtnSrc = '../../images/icon-pause.png'
 		})
-		this.myAudio.onStop(() => {
+		this.globalData.backgroundAudioPlay.onStop(() => {
+			this.playBtnSrc = '../../images/icon-run.png'
+			this.globalData.curAudio = {}
+		})
+		this.globalData.backgroundAudioPlay.onPause(() => {
 			this.playBtnSrc = '../../images/icon-run.png'
 		})
-		this.myAudio.onPause(() => {
-			this.playBtnSrc = '../../images/icon-run.png'
-		})
-		this.myAudio.onWaiting(() => {
+		this.globalData.backgroundAudioPlay.onWaiting(() => {
 			this.wxAudioUpdateProcess()
 		})
-		this.myAudio.onEnded(() => {
+		this.globalData.backgroundAudioPlay.onEnded(() => {
 			let curIndex = this.audioList.findIndex((item) => {
 				return (item.radioId == this.curAudio.radioId)
 			}) + 1
@@ -116,31 +132,39 @@ export default class RadioPlay extends wepy.page {
 			}else{
 				this.curAudio = this.audioList[curIndex]
 			}
-			this.wxAudioControls()
+			this.wxAudioControls(this.curAudio)
+			this.wxAudioSetContext(this.curAudio)
 		})
+		this.globalData.backgroundAudioPlay.onTimeUpdate(() => {
+			this.wxAudioUpdateProcess()
+		})
+  }
+
+  wxAudioControls(audio) {
+    this.globalData.backgroundAudioPlay.title = audio.title
+		this.globalData.backgroundAudioPlay.autoplay = true
+		this.globalData.backgroundAudioPlay.src = AUDIO_PATH + audio.audioName
 	}
 
-	wxAudioUpdateProcess() {
-			this.curProcess = Number.parseInt(this.myAudio.currentTime * 100 / this.myAudio.duration)
-			this.curTime = this.durationFilter(this.myAudio.currentTime)
-			this.$apply()
+	wxAudioSetContext(audio) {
+		this.totalDuration = this.totalDurationFilter(audio.playLength)
+		this.playBtnSrc = this.globalData.backgroundAudioPlay.paused ? '../../images/icon-run.png' : '../../images/icon-pause.png'
 	}
 
-	wxAudioControls(){
-		this.myAudio.title = this.curAudio.title
-		this.myAudio.autoplay = true
-		this.myAudio.src = AUDIO_PATH + this.curAudio.audioName
-		this.totalDuration = this.totalDurationFilter(this.curAudio.playLength)
+  totalDurationFilter(time){
+		return time.replace('分',':').replace('秒','')
 	}
 
-	durationFilter(time){
+  durationFilter(time){
 		let minute = Number.parseInt(time / 60).toString().padStart(2,'0'), 
 				sec = Number.parseInt(time % 60).toString().padStart(2,'0')
 		return `${minute}:${sec}`
 	}
 
-	totalDurationFilter(time){
-		return time.replace('分',':').replace('秒','')
+	wxAudioUpdateProcess() {
+		this.curProcess = Number.parseInt(this.globalData.backgroundAudioPlay.currentTime * 100 / this.globalData.backgroundAudioPlay.duration)
+		this.curTime = this.durationFilter(this.globalData.backgroundAudioPlay.currentTime)
+		this.$apply()
 	}
 }
 </script>

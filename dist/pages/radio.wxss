@@ -1,3 +1,4 @@
+@import "./../components/radio/audio-tool.wxss";
 @import "./../components/radio/list.wxss";
 @import "./../components/radio/cover.wxss";
-.radio-list-container{margin:10rpx 40rpx}
+.radio-list-container{margin:10rpx 40rpx}.radio-tool{position:fixed;bottom:0}

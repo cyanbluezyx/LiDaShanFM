@@ -31,7 +31,7 @@
   <view class="radio-list"  wx:if="{{$radioList$list.length > 0}}">
 		<block wx:for="{{$radioList$list}}" wx:for-index="$radioList$index" wx:for-item="$radioList$item" wx:key="$radioList$key">
 			<view bindtap="$radioList$playRadio" data-wpyplayradio-a="{{$radioList$item}}">
-				<view class="radio-title">{{$radioList$item.title}}</view>
+				<view class="radio-title {{$radioList$audio.radioId == $radioList$item.radioId ? 'red' : ''}}">{{$radioList$item.title}}</view>
 				<view class="radio-properties-container">
 					<view class="radio-properties-playcount">
 						<image src="../images/icon-play.png" style="width:20rpx;height:20rpx;"/>
@@ -48,4 +48,20 @@
 		</block>
 	</view>
 
+  </view>
+  
+  <view class="tool-container radio-tool" bindtap="$radioTool$navigateTo" wx:if="{{isShowTool}}">
+		<view class="tool-container tool-main">
+			<view class="tool-img">
+				<image src="../images/avator.jpg"/>
+			</view>
+			<view class="tool-context">
+				<view class="tool-title">{{$radioTool$audio.title}}</view>
+				<view class="tool-author">{{$radioTool$audio.author}}</view>
+			</view>
+			<view class="tool-btn-group">
+				<image class="tool-icon" src="{{$radioTool$playBtnSrc}}"  catch:tap="$radioTool$playAudio"/>
+				<image class="tool-icon" src="../images/icon-tool-next.png"  catch:tap="$radioTool$next" data-wpynext-a="1"/>
+			</view>
+		</view>
   </view>
