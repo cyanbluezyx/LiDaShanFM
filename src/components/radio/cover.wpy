@@ -15,7 +15,7 @@
 			</view>
 		</view>
 		<view class="btn-group">
-			<button class="button type_empity btn-50" formType="submit">分享给好友</button>
+			<button class="button type_empity btn-50" formType="submit" open-type="share">分享给好友</button>
 			<button class="button type_red btn-50" formType="submit" style="text-align:center;">
 				收藏
 				</button>

@@ -1,0 +1,9 @@
+
+  <view class="counter {{style}}">
+    <button bindtap="plus" size="mini">  +  </button>
+    <button bindtap="minus" size="mini">  -  </button>
+    <button bindtap="incNum" size="mini">  INCREMENT  </button>
+    <button bindtap="decNum" size="mini">  DECREMENT  </button>
+    <text class="count"> {{num}} </text>
+    <text class="count"> {{stateNum}} </text>
+  </view>

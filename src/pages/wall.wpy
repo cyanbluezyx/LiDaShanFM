@@ -2,12 +2,28 @@
   
 </style>
 <template>
-  <view></view>
+  <view>this is page Wall</view>
+  <counter :num.sync="50"></counter>
 </template>
 
 <script>
   import wepy from 'wepy'
+  import { connect } from 'wepy-redux'
+  import Counter from '../components/wall/counter'
+
+  @connect({
+    num (state) {
+      return state.counter.num
+    }
+  })
 
   export default class Wall extends wepy.page {
+    config = {
+      navigationBarTitleText: '表白墙'
+    }
+
+    components = {
+      counter: Counter
+    }
   }
 </script>

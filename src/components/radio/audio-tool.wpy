@@ -39,7 +39,8 @@ export default class AudioTool extends wepy.component {
 	}
 
 	data = {
-		playBtnSrc: ''
+		playBtnSrc: '',
+		audio: {}
 	}
 
 	watch = {
@@ -73,6 +74,7 @@ export default class AudioTool extends wepy.component {
 			this.$root.$parent.globalData.curAudio = this.audio
 			this.playBtnSrc = '../images/icon-tool-pause.png'
 			wx.setStorageSync(CURRENT_AUDIO,this.audio)
+			this.$root.$parent.addPlayCount(this.audio.radioId)
 		},
 		playAudio() {
 			let audioPlayer = this.$root.$parent.globalData.backgroundAudioPlay
@@ -91,7 +93,7 @@ export default class AudioTool extends wepy.component {
 		},
 		navigateTo() {
 			wepy.navigateTo({
-				url: '/pages/radio/radio_play?jsonStr={}'//?jsonStr=' + JSON.stringify(this.audio)
+				url: '/pages/radio/radio_play?jsonStr=' + JSON.stringify(this.audio)
 			})
 		}
 	}

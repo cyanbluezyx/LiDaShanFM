@@ -1,7 +1,7 @@
 <template>
   <radioCover></radioCover>
   <view class="radio-list-container">
-    <label style="color: #8a8a8a;font-size: 28rpx;">
+    <label style="color: #8a8a8a;font-size: 28rpx;margin-left: 40rpx;">
       节目列表 （{{radioList.length}}）
     </label>
     <radioList :list.sync="radioList" :audio.sync="curAudio"></radioList>
@@ -13,7 +13,7 @@
   import wepy from 'wepy'
 
   import api from '../api/api'
-  import {CURRENT_AUDIO} from '../utils/constant'
+  import {CURRENT_AUDIO, AUDIO_PATH, SYSTEM_INFO} from '../utils/constant'
 
   import RadioCover from '../components/radio/cover'
   import RadioList from '../components/radio/list'
@@ -33,7 +33,10 @@
     data = {
       radioList:[],
       curAudio: {},
-      isPlay: false
+      isPlay: false,
+      backgroundAudioPlay: {},
+      audioListHeight: 0,
+      audioListWidth: 0
     }
 
     computed = {
@@ -42,24 +45,86 @@
       }
     }
 
+    watch = {
+      curAudio (newValue, oldValue) {
+        this.$parent.globalData.curAudio = newValue
+        if(newValue === {}){
+          wepy.removeStorageSync(CURRENT_AUDIO)
+        }
+        else{
+          wepy.setStorageSync(CURRENT_AUDIO, newValue)
+        }
+      }
+    }
+
     onLoad() {
       let that = this
       let d = that.$parent.globalData
-      d.curAudioList = api.getAudioList()
-      this.radioList = d.curAudioList
-      this.curAudio = d.curAudio
+
+      d.backgroundAudioPlay = wx.getBackgroundAudioManager()
+      this.backgroundAudioPlay = d.backgroundAudioPlay
+
+      api.getAudioList({
+        query: {
+          author : '李大山'
+        }
+      }).then(resp => {
+        d.curAudioList = resp.data.result
+        that.radioList = d.curAudioList
+        that.curAudio = d.curAudio
+        this.$apply()
+      });
+      let systemInfo = wepy.getStorageSync(SYSTEM_INFO)
     }
 
     onShow() {
       this.curAudio = wepy.getStorageSync(CURRENT_AUDIO)
       let audioPlayer = this.$parent.globalData.backgroundAudioPlay
       this.isPlay = (audioPlayer.paused === undefined || audioPlayer.paused) ? false : true
+
+      this.backgroundAudioPlay.onEnded(() => {
+        let curIndex = this.radioList.findIndex((item) => {
+          return (item.radioId == this.curAudio.radioId)
+        }) + 1
+        if(curIndex >= this.radioList.length){
+          this.curAudio = this.radioList[0]
+        }else{
+          this.curAudio = this.radioList[curIndex]
+        }
+        this.backgroundAudioPlay.title = this.curAudio.title
+        this.backgroundAudioPlay.src = AUDIO_PATH + this.curAudio.audioName
+        this.$apply()
+        this.$parent.addPlayCount(this.curAudio.radioId)
+      })
+    }
+
+    onShareAppMessage(res) {
+      if (res.from === 'button') {
+        // 来自页面内转发按钮
+        console.log(res.target)
+      }
+      return {
+        title: '李大山FM',
+        path: '/pages/radio',
+        success: function(res) {
+          // 转发成功
+          console.log('success')
+        },
+        fail: function(res) {
+          // 转发失败
+          console.log('failure')
+        }
+      }
+    }
+
+    onPullDownRefresh()  {
+      this.onLoad();
     }
   }
 </script>
 <style lang="less">
   .radio-list-container{
-    margin: 10rpx 40rpx;
+    padding: 10rpx 40rpx;
   }
   .radio-tool{
     position: fixed;

@@ -1,0 +1,67 @@
+<style lang="less">
+  .counter {
+    text-align: left;
+    font-size: 12px;
+  }
+  .count {
+    font-size: 18px;
+    font-weight: bold;
+  }
+</style>
+<template>
+  <view class="counter {{style}}">
+    <button @tap="plus" size="mini">  +  </button>
+    <button @tap="minus" size="mini">  -  </button>
+    <button @tap="incNum" size="mini">  INCREMENT  </button>
+    <button @tap="decNum" size="mini">  DECREMENT  </button>
+    <button @tap="plus2" size="mini">  +  </button>
+    <text class="count"> {{num}} </text>
+    <text class="count"> {{stateNum}} </text>
+  </view>
+</template>
+<script>
+	import wepy from 'wepy'
+	import { connect, getStore } from 'wepy-redux'
+  import { INCREMENT, DECREMENT } from '../../store/types/counter'
+
+	@connect({
+		stateNum (state) {
+			return state.counter.num
+		}
+	},{
+		incNum: INCREMENT,
+		decNum: DECREMENT
+	})
+
+	export default class Counter extends wepy.component {
+    props = {
+      num: {
+        type: [Number, String],
+        coerce: function (v) {
+          return +v
+        },
+        default: 50
+      }
+    }
+
+    data = {
+    }
+
+    methods = {
+      plus () {
+        this.num = this.num + 1
+        console.log(this.$name + ' plus tap')
+
+        this.$emit('index-emit', 1, 2, 3)
+      },
+      plus2 () {
+        const store =  getStore()
+        store.dispatch({type: 'INCREMENT'})
+      },
+      minus () {
+        this.num = this.num - 1
+        console.log(this.$name + ' minus tap')
+      }
+		}
+	}
+</script>

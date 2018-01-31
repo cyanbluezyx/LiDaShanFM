@@ -1,2 +1,12 @@
 
-  <view/>
+  <view>this is page Wall</view>
+  
+  <view class="counter {{$counter$style}}">
+    <button bindtap="$counter$plus" size="mini">  +  </button>
+    <button bindtap="$counter$minus" size="mini">  -  </button>
+    <button bindtap="$counter$incNum" size="mini">  INCREMENT  </button>
+    <button bindtap="$counter$decNum" size="mini">  DECREMENT  </button>
+    <button bindtap="$counter$plus2" size="mini">  +  </button>
+    <text class="count"> {{$counter$num}} </text>
+    <text class="count"> {{$counter$stateNum}} </text>
+  </view>

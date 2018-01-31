@@ -22,8 +22,22 @@ import {
   USER_INFO,
   SYSTEM_INFO,
   AUDIO_PATH,
-  CURRENT_AUDIO
+  CURRENT_AUDIO,
+  SESSION_ID
 } from './utils/constant'
+
+import {
+  wxCode2Session,
+  wxLogin,
+  addPlayCount
+} from './api/api'
+
+import { setStore } from 'wepy-redux'
+import configStore from './store'
+
+const store = configStore()
+const state = store.getState()
+setStore(store)
 
 export default class extends wepy.app {
   config = {
@@ -38,7 +52,8 @@ export default class extends wepy.app {
       backgroundTextStyle: 'light',
       navigationBarBackgroundColor: '#EC1D24',
       navigationBarTitleText: '李大山FM',
-      navigationBarTextStyle: 'white'
+      navigationBarTextStyle: 'white',
+      enablePullDownRefresh: true
     },
     "tabBar": {
       "color": "#2C2C2C",
@@ -46,25 +61,25 @@ export default class extends wepy.app {
       "backgroundColor": "#F3F3F3",
       "borderStyle": "black",
       "list": [{
-        "pagePath": "pages/radio",
-        "text": "电台",
-        "iconPath": "images/radio_logo.png",
-        "selectedIconPath": "images/radio_logo_active.png"
+      "pagePath": "pages/radio",
+      "text": "电台",
+      "iconPath": "images/radio_logo.png",
+      "selectedIconPath": "images/radio_logo_active.png"
       }, {
-        "pagePath": "pages/community",
-        "text": "声控",
-        "iconPath": "images/micro_logo.png",
-        "selectedIconPath": "images/micro_logo_active.png"
+      "pagePath": "pages/community",
+      "text": "声控",
+      "iconPath": "images/micro_logo.png",
+      "selectedIconPath": "images/micro_logo_active.png"
       }, {
-        "pagePath": "pages/wall",
-        "text": "表白墙",
-        "iconPath": "images/love_logo.png",
-        "selectedIconPath": "images/love_logo_active.png"
+      "pagePath": "pages/wall",
+      "text": "表白墙",
+      "iconPath": "images/love_logo.png",
+      "selectedIconPath": "images/love_logo_active.png"
       }, {
-        "pagePath": "pages/info",
-        "text": "我",
-        "iconPath": "images/info_logo.png",
-        "selectedIconPath": "images/info_logo_active.png"
+      "pagePath": "pages/info",
+      "text": "我",
+      "iconPath": "images/info_logo.png",
+      "selectedIconPath": "images/info_logo_active.png"
       }]
     }
   }
@@ -81,30 +96,54 @@ export default class extends wepy.app {
     super()
     this.use('requestfix')
     this.use('promisify');
+    this.intercept('request', {
+        config (p) {
+            p.timestamp = +new Date();
+            return p;
+        },
+        success (p) {
+            console.log('request success');
+            return p;
+        },
+        fail (p) {
+            console.log('request error');
+            return p;
+        }
+    });
   }
 
   async onLaunch() {
-    let that = this
-
-    let userInfo = wepy.getStorageSync(USER_INFO) || {}
-    console.log(userInfo)
-
-    if(!userInfo.nickName){
+    let isExpired = false
+    wx.checkSession({
+      success: function(){
+        //session 未过期，并且在本生命周期一直有效
+        isExpired = false
+      },
+      fail: function(){
+        //登录态过期
+        isExpired = true
+      }
+    })
+    if(isExpired){
       let res = await wepy.login()
-
       if(res.code){
-        let _userInfo = await wepy.getUserInfo()
-
-        wepy.setStorageSync(USER_INFO,_userInfo.userInfo)
-        console.log(that.globalData.userInfo)
-
-        let _systemInfo = wepy.getSystemInfoSync()
-
-        wepy.setStorageSync(SYSTEM_INFO,_systemInfo)
-
+        let c = await wepy.getUserInfo();
+        wxCode2Session({
+          query: {
+            jsCode: res.code,
+            userInfo: c
+          }
+        }).then(resp => {
+          let res = resp.data
+          if(res.status == '0'){
+            wepy.setStorageSync('openid',res.result);
+            wepy.setStorageSync(USER_INFO, c.userInfo)
+            let systemInfo = wepy.getSystemInfoSync();
+            wepy.setStorageSync(SYSTEM_INFO, systemInfo);
+          }
+        })
       }
     }
-    this.wxAudioInit()
   }
 
   sleep (s) {
@@ -132,11 +171,14 @@ export default class extends wepy.app {
       }
     })
   }
-
-  wxAudioInit(){
-    this.globalData.backgroundAudioPlay = wx.getBackgroundAudioManager()
+  addPlayCount(radioId) {
+    addPlayCount({
+      method: 'POST',
+      query: {
+        audioId: radioId
+      }
+    })
   }
-
   
 }
 </script>

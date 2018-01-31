@@ -12,7 +12,7 @@
 						<image src="../../images/icon-count.png" style="width:20rpx;height:20rpx;"></image>
 						{{item.playLength}}
 					</view>
-					<view class="radio-properties-playdate">{{item.date}}</view>
+					<view class="radio-properties-playdate">{{item.uploadDate}}</view>
 					</view>
 				</view>
 			</view>
@@ -48,7 +48,7 @@ export default class RadioList extends wepy.component {
 </script>
 <style lang="less">
 	.radio-list{
-		border-top: solid 2rpx #cdcdcd;
+		border-top: solid 2rpx #d45454;
 		border-bottom: solid 2rpx #cdcdcd;
 		margin-top: 30rpx;
 		.radio-title{

@@ -95,18 +95,20 @@ export default class RadioPlay extends wepy.page {
 
 	onLoad(options) {
 		this.globalData = this.$parent.globalData
-		this.curAudio = Object.assign({},this.globalData.curAudio)
+		this.curAudio = this.globalData.curAudio
+		this.audioList = this.globalData.curAudioList
 		this.wxAudioInit()
 		//获取当前音频信息
 		let item = JSON.parse(options.jsonStr)
-		if(item.radioId !== undefined){
+		if(item.radioId === this.curAudio.radioId && this.globalData.backgroundAudioPlay.src !== undefined){
+			
+		}else{
 			this.curAudio = item
 			//获取音频列表（用于控制上下首跳转）
 			this.audioList = this.globalData.curAudioList
 			this.wxAudioControls(this.curAudio)
 		}
 		this.wxAudioSetContext(this.curAudio)
-		
 	}
 
 	wxAudioInit(){
@@ -141,7 +143,13 @@ export default class RadioPlay extends wepy.page {
   }
 
   wxAudioControls(audio) {
-    this.globalData.backgroundAudioPlay.title = audio.title
+		api.addPlayCount({
+			method: 'POST',
+			query: {
+				audioId: audio.radioId
+			}
+		})
+		this.globalData.backgroundAudioPlay.title = audio.title
 		this.globalData.backgroundAudioPlay.autoplay = true
 		this.globalData.backgroundAudioPlay.src = AUDIO_PATH + audio.audioName
 	}
@@ -158,7 +166,7 @@ export default class RadioPlay extends wepy.page {
   durationFilter(time){
 		let minute = Number.parseInt(time / 60).toString().padStart(2,'0'), 
 				sec = Number.parseInt(time % 60).toString().padStart(2,'0')
-		return `${minute}:${sec}`
+		return time ? `${minute}:${sec}` : `00:00`
 	}
 
 	wxAudioUpdateProcess() {
